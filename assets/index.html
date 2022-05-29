@@ -1,0 +1,300 @@
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Streamline</title>
+        <style>
+            html, body {
+                margin: 0;      padding: 0;
+                max-width: 100%;    min-height: 100%;
+                overflow: hidden;
+
+                --menu-width:           50px;
+                --menu-height:          50px;
+                --menu-button-width:    150px;
+                --menu-button-height:   35px;
+                --menu-num:             3;
+                --menu-separation:      6px;
+                --menu-active-height:   calc(var(--menu-button-height) * var(--menu-num) + (var(--menu-separation) + 4px) * var(--menu-num));
+
+                --menu-normal:  #EE8000FF;
+                --menu-hover:   #EE5000FF;
+                --menu-active:  #BB3000FF;
+                --menu-text:    #FFFFFFFF;
+
+                color: var(--menu-text);
+                background-color: #AA0000FF;
+                font-family: "Helvetica";
+            }
+
+            h2 {
+                margin-left: 4px;
+                margin-top: 4px;    margin-bottom: 4px;
+            }
+
+            .background_line {
+                position: absolute;
+                top: 0px;       left: calc(25% / 2 - 16px);
+                margin: 0;      padding: 0;
+                width: calc(75% + 32px);    height: 100%;
+                background-color: #EE5000FF;
+            }
+
+            /* Menu */
+            .menu {
+                position: absolute;
+                top: 8px;   right: 8px;
+            }
+
+            /* Menu Button */
+            .menu_button {
+                cursor: pointer;
+                text-align: center;
+                border: none;   outline: none;
+                padding: 12px;  font-size: 24px;
+                line-height: 50%;
+                z-index: 1;
+
+                width:  var(--menu-width);
+                height: var(--menu-height);
+                color:  var(--menu-text);
+                background-color: var(--menu-normal);
+                border: solid 2px #222222FF;
+                border-radius: calc(var(--menu-height) / 4);
+
+                transition: background-color 0.125s ease-in-out, border-radius 0.125s ease-in-out;
+            }
+            .menu_button:after {
+                content: "\2630";
+                font-weight: bold;
+            }
+
+            /* Menu Button (Hover) */
+            .menu_button:hover, .menu_active:hover {
+                background-color:   var(--menu-hover);
+                border-radius:      calc(var(--menu-height) / 2);
+            }
+
+            /* Menu Button (Active) */
+            .menu_active {
+                background-color: var(--menu-active);
+            }
+            .menu_active:after {
+                content: "\2715";
+            }
+
+            /* Menu Option */
+            .menu_content {
+                width:  var(--menu-button-width);
+                height: var(--menu-active-height);
+                overflow: hidden;
+                z-index: 1;
+
+                max-height: 0;
+                transition: max-height 0.125s ease-in-out;
+                margin-left: calc(var(--menu-width) - var(--menu-button-width));
+            }
+            .menu_option {
+                width:  var(--menu-button-width);
+                height: var(--menu-button-height);
+                color:  var(--menu-text);
+                z-index: 1;
+
+                cursor: pointer;
+                padding: 0;     margin: 0;
+                font-size: 18px;
+                margin-top: var(--menu-separation);
+            }
+
+            .link {
+                display: block;
+                width: 100%;    height: 100%;
+                text-decoration: none;
+            }
+            .link > p {
+                height: var(--menu-button-height);
+                background-color: var(--menu-normal);
+                border-radius: calc(var(--menu-button-height) / 4);
+                border: solid 2px #222222FF;
+
+                padding: 12px;  margin: 0;
+                padding-top: 0; padding-bottom: 0;
+                line-height: var(--menu-button-height);
+                text-align: right;
+
+                transition: background-color 0.125s ease-in-out, border-radius 0.125s ease-in-out;
+            }
+            .link > p:hover, .link > p:active {
+                background-color: var(--menu-hover);
+                border-radius: calc(var(--menu-button-height) / 2);
+            }
+            a:link      { color: var(--menu-text); }
+            a:hover     { color: var(--menu-text); }
+            a:active    { color: var(--menu-text); }
+            a:visited   { color: var(--menu-text); }
+
+            .form_section {
+                position: relative;
+                left: calc(25% / 2 - 8px);
+                width: 75%;
+                padding: 8px;
+                background-color: #222222FF;
+            }
+
+            fieldset {
+                width: calc(100% - 32px);
+                margin: auto;
+                margin-top: 4px;    margin-bottom: 4px;
+                margin-left: 2px;   margin-right: 2px;
+            }
+
+            fieldset > div {
+                display: flex;
+                position: relative;
+            }
+
+            form, .form {
+                padding: 0;     margin: 16px;
+            }
+
+            input[type="text"], input[type="number"], input[type="button"], input[type="submit"], label {
+                padding: 8px;   margin: auto;
+                border-width: 1px;
+                border-radius: 3px;
+                width: 100%;
+                margin-top: 2px;    margin-bottom: 2px;
+            }
+            input::-webkit-outer-spin-button,
+            input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+            input[type="number"] {
+                min-width: 20px;
+                max-width: 20px;
+                -moz-appearance: textfield;
+                text-align: center;
+            }
+
+            input[type="button"], input[type="submit"] {
+                cursor: pointer;
+                height: var(--menu-button-height);
+                color: var(--menu-text);
+                background-color: var(--menu-normal);
+                border-radius: calc(var(--menu-button-height) / 4);
+                font-size: 18px;
+                border-width: 0px;
+
+                padding: 12px;  margin: 2px;
+                padding-top: 0; padding-bottom: 0;
+                line-height: var(--menu-button-height);
+
+                transition: background-color 0.125s ease-in-out, border-radius 0.125s ease-in-out, border-width 0.125s ease-in-out;
+            }
+            input[type="submit"] {
+                height: calc(var(--menu-button-height) + var(--menu-button-height) / 2);
+                border: solid 2px #666666FF;
+                background-color: #00000000;
+
+                margin: 8px 0 8px 0;
+            }
+            input[type="button"]:hover, input[type="button"]:active, input[type="submit"]:hover, input[type="submit"]:active {
+                background-color: var(--menu-hover);
+                border-radius: calc(var(--menu-button-height) / 2);
+                border-width: 0px;
+            }
+
+            input[type="radio"] {
+                display: none;
+            }
+            label {
+                cursor: pointer;
+                height: var(--menu-button-height);
+                color: var(--menu-text);
+                background-color: var(--menu-normal);
+                border-radius: calc(var(--menu-button-height) / 4);
+                font-size: 16px;
+                text-align: center;
+
+                padding: 0px 4px 0px 4px;
+                margin: 0 1px 0 1px;
+                line-height: var(--menu-button-height);
+
+                transition: background-color 0.125s ease-in-out, border-radius 0.125s ease-in-out;
+            }
+            input[type="radio"]:checked + label {
+                background-color: var(--menu-active);
+            }
+            label:hover {
+                background-color: var(--menu-hover);
+                border-radius: calc(var(--menu-button-height) / 2);
+            }
+
+            #decrement {
+                padding: 4px;   margin-right: 1px;
+                line-height: calc(var(--menu-button-height) - 12px);
+                min-width: 20px;
+                max-width: 20px;
+                border-right: 0px;
+                border-radius: 10px 2px 2px 10px;
+            }
+            #decrement:hover, #decrement:active { border-radius: 10px 2px 2px 10px; }
+            #increment {
+                padding: 4px;   margin-left: 1px;
+                line-height: calc(var(--menu-button-height) - 12px);
+                min-width: 20px;
+                max-width: 20px;
+                border-left: 0px;
+                border-radius: 2px 10px 10px 2px;
+            }
+            #increment:hover, #increment:active { border-radius: 2px 10px 10px 2px; }
+        </style>
+        <script>
+            function update_all() {
+                document.getElementById("form_tournament_id").submit();
+                document.getElementById("form_tournament_info").submit();
+                document.getElementById("form_set_info").submit();
+            }
+        </script>
+    </head>
+    <body>
+        <div class = "background_line"></div>
+        <div            class = "menu">
+            <button     class = "menu_button"></button>
+            <div        class = "menu_content">
+                <div    class = "menu_option"><a class = "link" href = "/"          ><p>Status</p></a></div>
+                <div    class = "menu_option"><a class = "link" href = "/tool/"     ><p>Tool</p></a></div>
+                <div    class = "menu_option"><a class = "link" href = "/quit/"     ><p>Quit</p></a></div>
+            </div>
+        </div>
+        <div class = "form">
+            <div class = "form_section">
+                <h2>Streamline</h2>
+                <fieldset>
+                    <div>
+                        <input type = "button" onclick = "location.href='/';" value = "Status"/>
+                        <input type = "button" onclick = "location.href='/tool';" value = "Tool"/>
+                        <input type = "button" onclick = "location.href='/quit';" value = "Quit"/>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <script>
+            var coll = document.getElementsByClassName("menu_button");
+            var i;
+            for (i = 0; i < coll.length; i++) {
+                coll[i].addEventListener("click", function() {
+                    this.classList.toggle("menu_active");
+                    var content = this.nextElementSibling;
+                    if (content.style.maxHeight){
+                        content.style.maxHeight = null;
+                    }
+                    else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    } 
+                });
+            }
+        </script>
+    </body>
+</html>

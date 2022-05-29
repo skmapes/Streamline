@@ -1,0 +1,6 @@
+src/Streamline/Debug/
+src/Streamline/Release/
+src/Streamline/Streamline/Debug/
+src/Streamline/Streamline/Release/
+.vs/
+*.exe

@@ -1,0 +1,505 @@
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Streamline</title>
+        <style>
+            html, body {
+                margin: 0;      padding: 0;
+                max-width: 100%;    min-height: 100%;
+                overflow: hidden;
+
+                --menu-width:           50px;
+                --menu-height:          50px;
+                --menu-button-width:    150px;
+                --menu-button-height:   35px;
+                --menu-num:             3;
+                --menu-separation:      6px;
+                --menu-active-height:   calc(var(--menu-button-height) * var(--menu-num) + (var(--menu-separation) + 4px) * var(--menu-num));
+
+                --menu-normal:  #EE8000FF;
+                --menu-hover:   #EE5000FF;
+                --menu-active:  #BB3000FF;
+                --menu-text:    #FFFFFFFF;
+
+                color: var(--menu-text);
+                background-color: #AA0000FF;
+                font-family: "Helvetica";
+            }
+
+            h2 {
+                margin-left: 4px;
+                margin-top: 4px;    margin-bottom: 4px;
+            }
+
+            .background_line {
+                position: absolute;
+                top: 0px;       left: calc(25% / 2 - 16px);
+                margin: 0;      padding: 0;
+                width: calc(75% + 32px);    height: 100%;
+                background-color: #EE5000FF;
+            }
+
+            /* Menu */
+            .menu {
+                position: absolute;
+                top: 8px;   right: 8px;
+            }
+
+            /* Menu Button */
+            .menu_button {
+                cursor: pointer;
+                text-align: center;
+                border: none;   outline: none;
+                padding: 12px;  font-size: 24px;
+                line-height: 50%;
+                z-index: 1;
+
+                width:  var(--menu-width);
+                height: var(--menu-height);
+                color:  var(--menu-text);
+                background-color: var(--menu-normal);
+                border: solid 2px #222222FF;
+                border-radius: calc(var(--menu-height) / 4);
+
+                transition: background-color 0.125s ease-in-out, border-radius 0.125s ease-in-out;
+            }
+            .menu_button:after {
+                content: "\2630";
+                font-weight: bold;
+            }
+
+            /* Menu Button (Hover) */
+            .menu_button:hover, .menu_active:hover {
+                background-color:   var(--menu-hover);
+                border-radius:      calc(var(--menu-height) / 2);
+            }
+
+            /* Menu Button (Active) */
+            .menu_active {
+                background-color: var(--menu-active);
+            }
+            .menu_active:after {
+                content: "\2715";
+            }
+
+            /* Menu Option */
+            .menu_content {
+                width:  var(--menu-button-width);
+                height: var(--menu-active-height);
+                overflow: hidden;
+                z-index: 1;
+
+                max-height: 0;
+                transition: max-height 0.125s ease-in-out;
+                margin-left: calc(var(--menu-width) - var(--menu-button-width));
+            }
+            .menu_option {
+                width:  var(--menu-button-width);
+                height: var(--menu-button-height);
+                color:  var(--menu-text);
+                z-index: 1;
+
+                cursor: pointer;
+                padding: 0;     margin: 0;
+                font-size: 18px;
+                margin-top: var(--menu-separation);
+            }
+
+            .link {
+                display: block;
+                width: 100%;    height: 100%;
+                text-decoration: none;
+            }
+            .link > p {
+                height: var(--menu-button-height);
+                background-color: var(--menu-normal);
+                border-radius: calc(var(--menu-button-height) / 4);
+                border: solid 2px #222222FF;
+
+                padding: 12px;  margin: 0;
+                padding-top: 0; padding-bottom: 0;
+                line-height: var(--menu-button-height);
+                text-align: right;
+
+                transition: background-color 0.125s ease-in-out, border-radius 0.125s ease-in-out;
+            }
+            .link > p:hover, .link > p:active {
+                background-color: var(--menu-hover);
+                border-radius: calc(var(--menu-button-height) / 2);
+            }
+            a:link      { color: var(--menu-text); }
+            a:hover     { color: var(--menu-text); }
+            a:active    { color: var(--menu-text); }
+            a:visited   { color: var(--menu-text); }
+
+            .form_section {
+                position: relative;
+                left: calc(25% / 2 - 8px);
+                width: 75%;
+                padding: 8px;
+                background-color: #222222FF;
+            }
+
+            .section {
+                width: calc(100% - 32px);
+                margin: auto;
+                margin-top: 4px;    margin-bottom: 4px;
+                margin-left: 2px;   margin-right: 2px;
+            }
+            .subsection {
+                width: 100%;
+                margin: auto;
+                margin-top: 4px;    margin-bottom: 4px;
+                margin-left: 2px;   margin-right: 2px;
+            }
+            .center_section {
+                width: 25%;
+                margin: auto;
+                margin-top: 4px;    margin-bottom: 4px;
+                margin-left: 2px;   margin-right: 2px;
+            }
+
+            fieldset > div {
+                display: flex;
+                position: relative;
+            }
+
+            form, .form {
+                padding: 0;     margin: 16px;
+            }
+
+            input::-webkit-outer-spin-button,
+            input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+            input[type="radio"], input[type="checkbox"] {
+                display: none;
+            }
+            input[type="number"] {
+                min-width: 20px;
+                max-width: 20px;
+                -moz-appearance: textfield;
+                text-align: center;
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            .text {
+                padding: 8px;   margin: auto;
+                border-width: 1px;
+                border-radius: 3px;
+                width: 100%;
+                margin-top: 2px;    margin-bottom: 2px;
+            }
+            .button {
+                cursor: pointer;
+                padding: 8px;   margin: auto;
+                width: 100%;    height: var(--menu-button-height);
+                line-height:    var(--menu-button-height / 2);
+                font-size: 16px;
+                text-align: center;
+
+                color: var(--menu-text);
+                background-color: var(--menu-normal);
+
+                border: solid 2px #666666FF;
+                border-radius: calc(var(--menu-button-height) / 4);
+                background-color: #00000000;
+                transition: background-color 0.125s ease-in-out, border-radius 0.125s ease-in-out, border-color 0.125s ease-in-out;
+            }
+            .button:checked, .button:active, .active {
+                background-color: var(--menu-active);
+                border-radius: calc(var(--menu-button-height) / 4);
+                border-color: #00000000;
+            }
+            .button:hover {
+                background-color: var(--menu-hover);
+                border-radius: calc(var(--menu-button-height) / 2);
+                border-color: #00000000;
+            }
+
+            .left_button {
+                margin: 0;  margin-right: 1px;
+                min-width: 25px;    max-width: 25px;
+                border-right: 1px;
+                border-radius: 10px 2px 2px 10px;
+            }
+            .left_button:hover, .left_button:checked, .left_button:active {
+                border-right: 1px;
+                border-radius: 10px 2px 2px 10px;
+            }
+            .right_button {
+                margin: 0;  margin-left: 1px;
+                min-width: 25px;    max-width: 25px;
+                border-left: 1px;
+                border-radius: 2px 10px 10px 2px;
+            }
+            .right_button:hover, .right_button:checked, .right_button:active {
+                border-left: 1px;
+                border-radius: 2px 10px 10px 2px;
+            }
+        </style>
+        <script>
+            var p1 = 0;
+            var p2 = 0;
+            function update_all() {
+                document.getElementById("form_tournament_id").submit();
+                document.getElementById("form_tournament_info").submit();
+                document.getElementById("form_set_info").submit();
+            }
+            function number_increment(id) {
+                document.getElementById(id).stepUp();
+            }
+            function number_decrement(id) {
+                document.getElementById(id).stepDown();
+            }
+            function show_player(id) {
+                if (id == "player1") {
+                    if (p1 < 4) {
+                        p1 = p1 + 1;
+                        document.getElementById(id + "[" + p1 + "].name").style.display = 'block';
+                        document.getElementById(id + "[" + p1 + "].name").parentNode.style.display = 'flex';
+                    }
+                }
+                else {
+                    if (p2 < 4) {
+                        p2 = p2 + 1;
+                        document.getElementById(id + "[" + p2 + "].name").style.display = 'block';
+                        document.getElementById(id + "[" + p2 + "].name").parentNode.style.display = 'flex';
+                    }
+                }
+            }
+            function hide_player(id) {
+                if (id == "player1") {
+                    if (p1 > 0) {
+                        document.getElementById(id + "[" + p1 + "].name").style.display = 'none';
+                        document.getElementById(id + "[" + p1 + "].name").parentNode.style.display = 'none';
+                        document.getElementById(id + "[" + p1 + "].name").value = "";
+                        p1 = p1 - 1;
+                    }
+                }
+                else {
+                    if (p2 > 0) {
+                        document.getElementById(id + "[" + p2 + "].name").style.display = 'none';
+                        document.getElementById(id + "[" + p2 + "].name").parentNode.style.display = 'none';
+                        document.getElementById(id + "[" + p2 + "].name").value = "";
+                        p2 = p2 - 1;
+                    }
+                }
+            }
+            function set_bracket(id, value) {
+                if (document.getElementById(id + ".bracket").value != value) {
+                    document.getElementById(id + ".bracket").value = value;
+                    if (value.includes('W')) {
+                        document.getElementById(id + ".bracket.winners").classList.add("active");
+                        document.getElementById(id + ".bracket.losers").classList.remove("active");
+                    }
+                    else {
+                        document.getElementById(id + ".bracket.losers").classList.add("active");
+                        document.getElementById(id + ".bracket.winners").classList.remove("active");
+                    }
+                }
+                else {
+                    document.getElementById(id + ".bracket").value = "";
+                    if (value.includes('W')) {
+                        document.getElementById(id + ".bracket.winners").classList.remove("active");
+                    }
+                    else {
+                        document.getElementById(id + ".bracket.losers").classList.remove("active");
+                    }
+                }
+            }
+            function toggle_teams() {
+                if (document.getElementById("player1.name").classList.contains("hidden")) {
+                    document.getElementById("player1.name").classList.remove("hidden");
+                    document.getElementById("player2.name").classList.remove("hidden");
+                    document.getElementById("player1.name").parentNode.classList.remove("hidden");
+                    document.getElementById("player2.name").parentNode.classList.remove("hidden");
+                    document.getElementById("team_toggle").classList.add("active");
+                }
+                else {
+                    document.getElementById("player1.name").classList.add("hidden");
+                    document.getElementById("player2.name").classList.add("hidden");
+                    document.getElementById("player1.name").parentNode.classList.add("hidden");
+                    document.getElementById("player2.name").parentNode.classList.add("hidden");
+                    document.getElementById("team_toggle").classList.remove("active");
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div class = "background_line"></div>
+        <div            class = "menu">
+            <button     class = "menu_button"></button>
+            <div        class = "menu_content">
+                <div    class = "menu_option"><a class = "link" href = "/"          ><p>Status</p></a></div>
+                <div    class = "menu_option"><a class = "link" href = "/tool/"     ><p>Tool</p></a></div>
+                <div    class = "menu_option"><a class = "link" href = "/quit/"     ><p>Quit</p></a></div>
+            </div>
+        </div>
+        <iframe name = "dummy" id = "dummy" style = "display: none;"></iframe>
+        <form   id = "form_tournament_id"   action = "/get/tournament"      method="post" enctype = "multipart/form-data" target = "dummy">
+            <div class = "form_section">
+                <fieldset>
+                    <legend>Tournament ID</legend>
+                    <div>
+                        <input type = "text"    class = "text"  id = "tournament_id"    name = "tournament_id"      placeholder = "Tournament ID"><br>
+                    </div>
+                    <input type = "submit"  class = "button"    value = "Update">
+                </fieldset>
+            </div>
+        </form>
+        <form   id = "form_tournament_info" action = "/update/tournament"   method="post" enctype = "multipart/form-data" target = "dummy">
+            <div class = "form_section">
+                <fieldset>
+                    <legend>Tournament Information</legend>
+                    <div>
+                        <input type = "text"    class = "text"  id = "tournament_name"  name = "tournament_name"    placeholder = "Tournament Name"><br>
+                        <input type = "text"    class = "text"  id = "tournament_date"  name = "tournament_date"    placeholder = "Tournament Date"><br>
+                        <input type = "text"    class = "text"  id = "event_name"       name = "event_name"         placeholder = "Event Name"><br>
+                    </div>
+                    <input type = "submit"  class = "button"    value = "Update">
+                </fieldset>
+            </div>
+        </form>
+        <form   id = "form_set_info"        action = "/update/set"          method="post" enctype = "multipart/form-data" target = "dummy">
+            <div class = "form_section">
+                <fieldset   class = "section">
+                    <legend>Set Information</legend>
+                    <div>
+                        <input type = "text"    class = "text"  id = "set_name"     name = "set_name"           placeholder = "Set Name"    autocomplete = "on" list = "set_name_list"><br>
+                        <datalist               id = "set_name_list">
+                            <option             value = "Friendlies"></option>
+                            <option             value = "Round "></option>
+                            <option             value = "Losers Round "></option>
+                            <option             value = "Losers Quarters"></option>
+                            <option             value = "Losers Semis"></option>
+                            <option             value = "Losers Finals"></option>
+                            <option             value = "Winners Round "></option>
+                            <option             value = "Winners Quarters"></option>
+                            <option             value = "Winners Semis"></option>
+                            <option             value = "Winners Finals"></option>
+                            <option             value = "Grand Finals"></option>
+                            <option             value = "Grand Finals Reset"></option>
+                        </datalist>
+                        <input type = "text"    class = "text"  id = "set_goal"     name = "set_goal"           placeholder = "Set Goal"    autocomplete = "on" list = "set_goal_list"><br>
+                        <datalist               id = "set_goal_list">
+                            <option             value = "First to 2"></option>
+                            <option             value = "First to 3"></option>
+                            <option             value = "First to 5"></option>
+                            <option             value = "First to 10"></option>
+                        </datalist>
+                    </div>
+                    <div>
+                        <fieldset   class = "subsection">
+                            <legend>Player 1 Side</legend>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player1.name"     class = "text hidden"   name = "player1.name"       placeholder = "Team Name">
+                            </div>
+                            <div>
+                                <input type = "text"    id = "player1[0].name"  class = "text"          name = "player1[0].name"    placeholder = "Player Name">
+                            </div>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player1[1].name"  class = "text hidden"   name = "player1[1].name"    placeholder = "Additional Player Name">
+                            </div>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player1[2].name"  class = "text hidden"   name = "player1[2].name"    placeholder = "Additional Player Name">
+                            </div>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player1[3].name"  class = "text hidden"   name = "player1[3].name"    placeholder = "Additional Player Name">
+                            </div>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player1[4].name"  class = "text hidden"   name = "player1[4].name"    placeholder = "Additional Player Name">
+                            </div>
+                            <div>
+                                <input type = "button"  id = "remove_player"    class = "button left_button"    onclick = "hide_player('player1')"  value = "-"/>
+                                <input type = "button"  id = "add_player"       class = "button right_button"   onclick = "show_player('player1')"  value = "+"/>
+                                <input type = "button"  id = "player1.bracket.winners"  class = "button"        onclick = "set_bracket('player1', ' [W]')"      value = "Winners">
+                                <input type = "button"  id = "player1.bracket.losers"   class = "button"        onclick = "set_bracket('player1', ' [L]')"      value = "Losers">
+                                <input type = "text"    id = "player1.bracket"  class = "text hidden"           name = "player1.bracket"            value = "">
+                                <input type = "button"  id = "decrement"        class = "button left_button"    onclick = "number_decrement('player1.score')"   value = "-"/>
+                                <input type = "number"  id = "player1.score"    name = "player1.score"  value = "0">
+                                <input type = "button"  id = "increment"        class = "button right_button"   onclick = "number_increment('player1.score')"   value = "+"/>
+                            </div>
+                        </fieldset>
+                        <div    class = "center_section">
+                            <div>
+                                <input type = "button"      id = "swap_players" class = "button"    onclick = "swap_players()"  value = "Swap Players"/>
+                            </div>
+                            <div>
+                                <input type = "button"      id = "swap_cameras" class = "button"    onclick = "swap_cameras()"  value = "Swap Cameras"/>
+                            </div>
+                            <div>
+                                <input type = "button"      id = "team_toggle"  class = "button"    onclick = "toggle_teams()"  value = "Team Names"/>
+                            </div>
+                        </div>
+                        <fieldset   class = "subsection">
+                            <legend>Player 2 Side</legend>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player2.name"     class = "text hidden"   name = "player2.name"       placeholder = "Team Name">
+                            </div>
+                            <div>
+                                <input type = "text"    id = "player2[0].name"  class = "text"          name = "player2[0].name"    placeholder = "Player Name">
+                            </div>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player2[1].name"  class = "text hidden"   name = "player2[1].name"    placeholder = "Additional Player Name">
+                            </div>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player2[2].name"  class = "text hidden"   name = "player2[2].name"    placeholder = "Additional Player Name">
+                            </div>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player2[3].name"  class = "text hidden"   name = "player2[3].name"    placeholder = "Additional Player Name">
+                            </div>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player2[4].name"  class = "text hidden"   name = "player2[4].name"    placeholder = "Additional Player Name">
+                            </div>
+                            <div>
+                                <input type = "button"  id = "decrement"        class = "button left_button"    onclick = "number_decrement('player2.score')"   value = "-"/>
+                                <input type = "number"  id = "player2.score"    name = "player2.score"  value = "0">
+                                <input type = "button"  id = "increment"        class = "button right_button"   onclick = "number_increment('player2.score')"   value = "+"/>
+                                <input type = "button"  id = "player2.bracket.winners"  class = "button"        onclick = "set_bracket('player2', '[W] ')"      value = "Winners">
+                                <input type = "button"  id = "player2.bracket.losers"   class = "button"        onclick = "set_bracket('player2', '[L] ')"      value = "Losers">
+                                <input type = "text"    id = "player2.bracket"  class = "text hidden"           name = "player2.bracket"            value = "">
+                                <input type = "button"  id = "remove_player"    class = "button left_button"    onclick = "hide_player('player2')"  value = "-"/>
+                                <input type = "button"  id = "add_player"       class = "button right_button"   onclick = "show_player('player2')"  value = "+"/>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <input type = "submit"  class = "button"    value = "Update">
+                </fieldset>
+            </div>
+        </form>
+        <div class = "form">
+            <div class = "form_section">
+                <fieldset   class = "section">
+                    <legend>Options</legend>
+                    <div>
+                        <input type = "button"  class = "button"    onclick = "update_all()" value = "Update All"/>
+                        <input type = "button"  class = "button"    onclick = "location.href='/quit';" value = "Quit"/>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <script>
+            var coll = document.getElementsByClassName("menu_button");
+            var i;
+            for (i = 0; i < coll.length; i++) {
+                coll[i].addEventListener("click", function() {
+                    this.classList.toggle("menu_active");
+                    var content = this.nextElementSibling;
+                    if (content.style.maxHeight){
+                        content.style.maxHeight = null;
+                    }
+                    else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    } 
+                });
+            }
+        </script>
+    </body>
+</html>
