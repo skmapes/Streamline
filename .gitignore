@@ -1,5 +1,9 @@
+src/Streamline/x32/
+src/Streamline/x64/
 src/Streamline/Debug/
 src/Streamline/Release/
+src/Streamline/Streamline/x32/
+src/Streamline/Streamline/x64/
 src/Streamline/Streamline/Debug/
 src/Streamline/Streamline/Release/
 .vs/

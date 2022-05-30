@@ -3,13 +3,13 @@
     <h1 align="center">
         Streamline<br>
         <a href="https://github.com/skmapes/Streamline/graphs/contributors" alt="Contributors">
-            <img src="https://img.shields.io/github/contributors/skmapes/Streamline?style=flat"/>
+            <img src="https://img.shields.io/github/contributors/skmapes/Streamline?style=flat-square"/>
         </a>
         <a href="https://github.com/skmapes/Streamline/network/members" alt="Forks">
-            <img src="https://img.shields.io/github/forks/skmapes/Streamline?style=flat"/>
+            <img src="https://img.shields.io/github/forks/skmapes/Streamline?style=flat-square"/>
         </a>
         <a href="https://github.com/skmapes/Streamline/issues" alt="Issues">
-            <img src="https://img.shields.io/github/issues/skmapes/Streamline.svg?style=flat"/>
+            <img src="https://img.shields.io/github/issues/skmapes/Streamline.svg?style=flat-square"/>
         </a>
     </h1>
     <p  align="center">
