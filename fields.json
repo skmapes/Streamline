@@ -1,0 +1,69 @@
+{
+	"form_data": {
+		"fields": {
+			"tournament_info": {
+				"name": "Tournament Info",
+				"type": "form",
+				"parent": "form_data",
+				"fields": {
+					"tournament_name": {
+						"name": "Tournament Name",
+						"type": "text",
+						"parent": "tournament_info"
+					},
+					"tournament_date": {
+						"name": "Tournament Date",
+						"type": "text",
+						"parent": "tournament_info"
+					},
+					"event_name": {
+						"name": "Event Name",
+						"type": "text",
+						"parent": "tournament_info"
+					}
+				}
+			},
+			"set_info": {
+				"name": "Set Info",
+				"type": "form",
+				"parent": "form_data",
+				"fields": {
+					"set_name": {
+						"name": "Set Name",
+						"type": "text",
+						"parent": "set_info"
+					},
+					"player_1": {
+						"name": "Player 1",
+						"type": "form",
+						"parent": "set_info",
+						"fields": {
+							"player_1_name": {
+								"name": "Player 1 Name",
+								"type": "text",
+								"parent": "player_1"
+							}
+						}
+					},
+					"player_2": {
+						"name": "Player 2",
+						"type": "form",
+						"parent": "set_info",
+						"fields": {
+							"player_2_name": {
+								"name": "Player 2 Name",
+								"type": "text",
+								"parent": "player_2"
+							}
+						}
+					},
+                    "swap_players": {
+						"name": "Swap Players",
+						"type": "button",
+						"parent": "set_info"
+					}
+				}
+			}
+		}
+	}
+}

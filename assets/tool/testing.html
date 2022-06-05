@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Streamline</title>
+        <script>
+            function add_new_player(id) {
+                let parent = document.getElementById(id);
+                parent.innerHTML += "<div><input type = \"text\"    id = \"player1[].name\"  class = \"text " + id + "_input\"          name = \"player1[].name\"    placeholder = \"Player Name\"></div>"
+            }
+        </script>
+    </head>
+    <body>
+        <iframe name = "dummy" id = "dummy" style = "display: none;"></iframe>
+        <form   id = "form_set_info"        action = "/update/set"          method="post" enctype = "multipart/form-data" target = "dummy">
+            <div class = "form_section">
+                <fieldset   class = "section">
+                    <legend>Set Information</legend>
+                    <div>
+                        <input type = "text"    class = "text"  id = "set_name"     name = "set_name"           placeholder = "Set Name"    autocomplete = "on" list = "set_name_list"><br>
+                        <datalist               id = "set_name_list">
+                            <option             value = "Friendlies"></option>
+                            <option             value = "Round "></option>
+                            <option             value = "Losers Round "></option>
+                            <option             value = "Losers Quarters"></option>
+                            <option             value = "Losers Semis"></option>
+                            <option             value = "Losers Finals"></option>
+                            <option             value = "Winners Round "></option>
+                            <option             value = "Winners Quarters"></option>
+                            <option             value = "Winners Semis"></option>
+                            <option             value = "Winners Finals"></option>
+                            <option             value = "Grand Finals"></option>
+                            <option             value = "Grand Finals Reset"></option>
+                        </datalist>
+                        <input type = "text"    class = "text"  id = "set_goal"     name = "set_goal"           placeholder = "Set Goal"    autocomplete = "on" list = "set_goal_list"><br>
+                        <datalist               id = "set_goal_list">
+                            <option             value = "First to 2"></option>
+                            <option             value = "First to 3"></option>
+                            <option             value = "First to 5"></option>
+                            <option             value = "First to 10"></option>
+                        </datalist>
+                    </div>
+                    <div>
+                        <fieldset   class = "subsection">
+                            <legend>Player 1 Side</legend>
+                            <div id = "player1">
+                                <div class = "hidden">
+                                    <input type = "text"    id = "player1.name"     class = "text hidden"           name = "player1.name"       placeholder = "Team Name">
+                                </div>
+                                <div>
+                                    <input type = "text"    id = "player1[0].name"  class = "text player1_input"    name = "player1[].name"    placeholder = "Player Name">
+                                </div>
+                            </div>
+                            <div>
+                                <input type = "button"  id = "remove_player"    class = "button left_button"    onclick = "hide_player('player1')"  value = "-"/>
+                                <input type = "button"  id = "add_player"       class = "button right_button"   onclick = "add_new_player('player1')"  value = "+"/>
+                                <input type = "button"  id = "player1.bracket.winners"  class = "button"        onclick = "set_bracket('player1', ' [W]')"      value = "Winners">
+                                <input type = "button"  id = "player1.bracket.losers"   class = "button"        onclick = "set_bracket('player1', ' [L]')"      value = "Losers">
+                                <input type = "text"    id = "player1.bracket"  class = "text hidden"           name = "player1.bracket"            value = "">
+                                <input type = "button"  id = "decrement"        class = "button left_button"    onclick = "number_decrement('player1.score')"   value = "-"/>
+                                <input type = "number"  id = "player1.score"    name = "player1.score"  value = "0">
+                                <input type = "button"  id = "increment"        class = "button right_button"   onclick = "number_increment('player1.score')"   value = "+"/>
+                            </div>
+                        </fieldset>
+                        <div    class = "center_section">
+                            <div>
+                                <input type = "button"      id = "swap_players" class = "button"    onclick = "swap_players()"  value = "Swap Players"/>
+                            </div>
+                            <div>
+                                <input type = "button"      id = "swap_cameras" class = "button"    onclick = "swap_cameras()"  value = "Swap Cameras"/>
+                            </div>
+                            <div>
+                                <input type = "button"      id = "team_toggle"  class = "button"    onclick = "toggle_teams()"  value = "Team Names"/>
+                            </div>
+                        </div>
+                        <fieldset   class = "subsection">
+                            <legend>Player 2 Side</legend>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player2.name"     class = "text hidden"   name = "player2.name"       placeholder = "Team Name">
+                            </div>
+                            <div>
+                                <input type = "text"    id = "player2[0].name"  class = "text"          name = "player2[0].name"    placeholder = "Player Name">
+                            </div>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player2[1].name"  class = "text hidden"   name = "player2[1].name"    placeholder = "Additional Player Name">
+                            </div>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player2[2].name"  class = "text hidden"   name = "player2[2].name"    placeholder = "Additional Player Name">
+                            </div>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player2[3].name"  class = "text hidden"   name = "player2[3].name"    placeholder = "Additional Player Name">
+                            </div>
+                            <div class = "hidden">
+                                <input type = "text"    id = "player2[4].name"  class = "text hidden"   name = "player2[4].name"    placeholder = "Additional Player Name">
+                            </div>
+                            <div>
+                                <input type = "button"  id = "decrement"        class = "button left_button"    onclick = "number_decrement('player2.score')"   value = "-"/>
+                                <input type = "number"  id = "player2.score"    name = "player2.score"  value = "0">
+                                <input type = "button"  id = "increment"        class = "button right_button"   onclick = "number_increment('player2.score')"   value = "+"/>
+                                <input type = "button"  id = "player2.bracket.winners"  class = "button"        onclick = "set_bracket('player2', '[W] ')"      value = "Winners">
+                                <input type = "button"  id = "player2.bracket.losers"   class = "button"        onclick = "set_bracket('player2', '[L] ')"      value = "Losers">
+                                <input type = "text"    id = "player2.bracket"  class = "text hidden"           name = "player2.bracket"            value = "">
+                                <input type = "button"  id = "remove_player"    class = "button left_button"    onclick = "hide_player('player2')"  value = "-"/>
+                                <input type = "button"  id = "add_player"       class = "button right_button"   onclick = "show_player('player2')"  value = "+"/>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <input type = "submit"  class = "button"    value = "Update">
+                </fieldset>
+            </div>
+        </form>
+    </body>
+</html>

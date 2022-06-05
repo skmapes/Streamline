@@ -2,6 +2,7 @@
 #include <crow.h>       // server library from crowcpp.org
 #include <fstream>      // input output for HTML pages and JSON files
 #include <iostream>     // logging
+#include <memory>
 
 #include <windows.h>    // run in background
 
@@ -16,8 +17,8 @@ void log(std::string str) {
 crow::SimpleApp app;
 
 int main() {
-    HWND hWnd = GetConsoleWindow();
-    ShowWindow(hWnd, SW_HIDE);
+    //HWND hWnd = GetConsoleWindow();
+    //ShowWindow(hWnd, SW_HIDE);
 
     /////////////////////
     // start endpoints //
@@ -32,7 +33,7 @@ int main() {
         if (input_file.is_open()) {
             while (input_file) {
                 std::getline(input_file, input_line);
-                result = result + input_line;
+                result = result + input_line + "\n";
             }
         }
         return result;
@@ -46,7 +47,7 @@ int main() {
         if (input_file.is_open()) {
             while (input_file) {
                 std::getline(input_file, input_line);
-                result = result + input_line;
+                result = result + input_line + "\n";
             }
         }
         return result;
@@ -60,22 +61,51 @@ int main() {
         if (input_file.is_open()) {
             while (input_file) {
                 std::getline(input_file, input_line);
-                result = result + input_line;
+                result = result + input_line + "\n";
             }
         }
         return result;
-        });
+    });
     CROW_ROUTE(app, "/quit/")([]() {
         std::string     result = "server stopped";
         app.stop();     // for some reason this makes it so that app needs to be global??? i wish i could figure out how to make it work without that but for now it stays
         return result;
-        });
+    });
     // /server_status sends a small text blurb with information about how the server is doing
     CROW_ROUTE(app, "/server_status/")([]() {
         std::string     result = "hello :)";
         return result;
-        });
+    });
 
+    CROW_ROUTE(app, "/get/fields/")([]() {
+        std::string     result = "";
+        std::string     input_line;
+        std::ifstream   input_file;
+        input_file.open("./fields.json");
+        if (input_file.is_open()) {
+            while (input_file) {
+                std::getline(input_file, input_line);
+                result = result + input_line + "\n";
+            }
+        }
+        return result;
+    });
+    CROW_ROUTE(app, "/post/fields").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+        crow::multipart::message    msg(req);
+        std::ofstream output_file;
+        output_file.open("./fields.json");
+        output_file << msg.parts[0].body << "\n";
+        output_file.close();
+        return "";
+    });
+    CROW_ROUTE(app, "/update").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+        crow::multipart::message    msg(req);
+        std::ofstream output_file;
+        output_file.open("./assets/" + msg.parts[0].body);
+        output_file << msg.parts[1].body << "\n";
+        output_file.close();
+        return "";
+    });
     // /get/tournament goes to start.gg and retrieves tournament info
     CROW_ROUTE(app, "/get/tournament").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
         crow::multipart::message msg(req);

@@ -149,8 +149,9 @@
                 margin-left: 2px;   margin-right: 2px;
             }
             .subsection {
-                width: 100%;
+                display: inline-block;
                 margin: auto;
+                width: 100%;
                 margin-top: 4px;    margin-bottom: 4px;
                 margin-left: 2px;   margin-right: 2px;
             }
@@ -243,8 +244,304 @@
                 border-left: 1px;
                 border-radius: 2px 10px 10px 2px;
             }
+            #player1, #player2 {
+                width: calc(100% - 16px);
+                display: block;
+            }
         </style>
         <script>
+
+            var fields = [];
+
+            window.onload = init;
+
+            async function init() {
+                var coll = document.getElementsByClassName("menu_button");
+                for (var i = 0; i < coll.length; i++) {
+                    coll[i].addEventListener("click", function() {
+                        this.classList.toggle("menu_active");
+                        var content = this.nextElementSibling;
+                        if (content.style.maxHeight){
+                            content.style.maxHeight = null;
+                        }
+                        else {
+                            content.style.maxHeight = content.scrollHeight + "px";
+                        } 
+                    });
+                }
+                let data = await get_info("/get/fields");
+                let fields = Object.keys(data["form_data"]["fields"]);
+                for (var j = 0; j < fields.length; j++) {
+                    process(j, document.body, data["form_data"]["fields"][fields[j]]);
+                }
+            }
+            function get_info(location) {
+                return new Promise(function (resolve) {
+                    const oReq = new XMLHttpRequest();
+                    oReq.addEventListener("load", reqListener);
+                    oReq.open("GET", location, true);
+                    oReq.send();
+
+                    function reqListener () {
+                        resolve(JSON.parse(oReq.responseText));
+                    }
+                });
+            }
+
+            function create_id(str) {
+                str = str.toLowerCase();
+                for (var i = 0; i < str.length; i++) {
+                    str = str.replace(" ", "_");
+                }
+                return str;
+            }
+            function process(j, parent, obj) {
+                if (obj["type"] == "form") {
+                    add_new_form(j, obj);
+                    let new_parent = document.getElementById(create_id(obj["name"]));
+                    let fields = Object.keys(obj["fields"]);
+                    for (var i = 0; i < fields.length; i++) {
+                        process(j, new_parent, obj["fields"][fields[i]]);
+                    }
+                }
+                else {
+                    add_new_field(j, parent.children[1], obj);
+                }
+            }
+            function add_new_form(j, obj) {
+
+                var is_section = false;
+
+                var name, type, parent;
+                if (obj == undefined) {
+                    name = document.getElementById("tool_form_target").value;
+                    type = "form";
+                    parent = document.getElementById("tool_form_parent").value;
+                }
+                else {
+                    name = obj["name"];
+                    type = obj["type"];
+                    parent = obj["parent"];
+                }
+                let id = create_id(name);
+                parent = create_id(parent);
+
+                var parent_element;
+                if (parent == "" || parent == "form_data") {
+                    parent_element = document.body;
+                }
+                else {
+                    is_section = true;
+                    parent_element = document.getElementById("fieldset_" + parent);
+                }
+                
+                if (is_section) {
+
+                    var center;
+                    if (parent_element.children.length >= 3) {
+                        center = parent_element.children[2];
+                    }
+                    else {
+                        center = document.createElement("div");
+                        center.setAttribute("class", "center");
+                        center.setAttribute("id", "center_" + parent);
+                        parent_element.appendChild(center);
+                    }
+
+                    let div = document.createElement("div");
+                    div.setAttribute("class", "subsection");
+                    div.setAttribute("id", id);
+                    center.appendChild(div);
+
+                    let fieldset = document.createElement("fieldset");
+                    fieldset.setAttribute("class",  "section");
+                    fieldset.setAttribute("id",     "fieldset_" + id);
+                    div.appendChild(fieldset);
+
+                    let legend = document.createElement("legend");
+                    legend.innerHTML = name;
+                    fieldset.appendChild(legend);
+
+                    let elements = document.createElement("div");
+                    fieldset.appendChild(elements);
+                }
+                else {
+                    let element_input = document.createElement("form");
+                    element_input.setAttribute("id",        id);
+                    element_input.setAttribute("method",    "post");
+                    element_input.setAttribute("enctype",   "multipart/form-data");
+                    element_input.setAttribute("target",    "dummy");
+                    parent_element.appendChild(element_input);
+
+                    let div = document.createElement("div");
+                    div.setAttribute("class", "form_section");
+                    element_input.appendChild(div);
+
+                    let fieldset = document.createElement("fieldset");
+                    fieldset.setAttribute("class",  "section");
+                    fieldset.setAttribute("id",     "fieldset_" + id);
+                    div.appendChild(fieldset);
+
+                    let legend = document.createElement("legend");
+                    legend.innerHTML = name;
+                    fieldset.appendChild(legend);
+
+                    let elements = document.createElement("div");
+                    fieldset.appendChild(elements);
+
+                    let submit = document.createElement("input");
+                    submit.setAttribute("type",  "button");
+                    submit.setAttribute("class", "button");
+                    submit.setAttribute("value", "Update");
+                    submit.setAttribute("onclick", "update(\"" + id + "\")");
+                    div.appendChild(submit);
+                }
+
+                let element = [];
+                for (var i = 0; i < 4; i++) {
+                    element.push(document.createElement("input"));
+                    element[i].setAttribute("type", "text");
+                    element[i].setAttribute("class", "hidden");
+                    element[i].setAttribute("name", id + "_" + i);
+                }
+                element[0].setAttribute("value", id);
+                element[1].setAttribute("value", name);
+                element[2].setAttribute("value", type);
+                element[3].setAttribute("value", parent);
+                for (var i = 0; i < element.length; i++) {
+                    document.getElementById("fields").appendChild(element[i]);
+                }
+            }
+            function add_new_field(i, parent, obj) {
+                var name, type, parent;
+                if (obj == undefined) {
+                    name = document.getElementById("tool_field_target").value;
+                    type = "text";
+                    parent = create_id(document.getElementById("tool_field_parent").value);
+                }
+                else {
+                    name = obj["name"];
+                    type = obj["type"];
+                    parent = obj["parent"];
+                }
+                let id = create_id(name);
+                let element_input = document.createElement("input");
+                let x = document.getElementById(parent).children.length;
+                element_input.setAttribute("type",  type);
+                element_input.setAttribute("id",    id);
+                element_input.setAttribute("name",  id);
+                element_input.setAttribute("class", type);
+                if (type == "text") {
+                    element_input.setAttribute("placeholder", name);
+                }
+                if (type == "button") {
+                    element_input.setAttribute("value", name);
+                }
+                if (type == "number") {
+                    element_input.setAttribute("value", 0);
+                }
+                document.getElementById("fieldset_" + parent).children[1].appendChild(element_input);
+
+                if (type == "text" || type == "number") {
+                    let element = [];
+                    for (var i = 0; i < 4; i++) {
+                        element.push(document.createElement("input"));
+                        element[i].setAttribute("type", "text");
+                        element[i].setAttribute("class", "hidden");
+                        element[i].setAttribute("name", id + "_" + i);
+                    }
+                    element[0].setAttribute("value", id);
+                    element[1].setAttribute("value", name);
+                    element[2].setAttribute("value", type);
+                    element[3].setAttribute("value", parent);
+                    for (var i = 0; i < element.length; i++) {
+                        document.getElementById("fields").appendChild(element[i]);
+                    }
+                }
+            }
+            function save_fields() {
+                let form = document.getElementById("fields");
+                let set_form = document.getElementById("form_update");
+
+                let data = {
+                    form_data: {
+                        fields: {}
+                    }
+                };
+                var elements = form.elements;
+                for (var i = 0; i < elements.length; i = i + 4) {
+                    iterateObject(data, elements[i].value, elements[i + 1].value, elements[i + 2].value, elements[i + 3].value);
+                }
+                
+                let element = document.createElement("input")
+                element.setAttribute("type", "text");
+                element.setAttribute("class", "hidden");
+                element.setAttribute("name", "data");
+                element.setAttribute("value", JSON.stringify(data));
+                while (set_form.lastChild) {
+                    set_form.removeChild(set_form.lastChild);
+                }
+                set_form.appendChild(element);
+                set_form.action = "/post/fields";
+                set_form.submit();
+            }
+            function update(id) {
+                let form = document.getElementById(id);
+                let set_form = document.getElementById("form_update");
+                var filename = id + ".json";
+
+                let data = {};
+                var elements = form.elements;
+                for (var i = 0; i < elements.length; i++) {
+                    if (elements[i].tagName.toLowerCase() == 'input' && elements[i].getAttribute('type') != 'button') {
+                        data[elements[i].id] = elements[i].value;
+                    }
+                }
+                
+                let doc = document.createElement("input");
+                doc.setAttribute("type", "text");
+                doc.setAttribute("class", "hidden");
+                doc.setAttribute("name", "filename");
+                doc.setAttribute("value", filename);
+                let element = document.createElement("input")
+                element.setAttribute("type", "text");
+                element.setAttribute("class", "hidden");
+                element.setAttribute("name", "data");
+                element.setAttribute("value", JSON.stringify(data));
+                while (set_form.lastChild) {
+                    set_form.removeChild(set_form.lastChild);
+                }
+                set_form.appendChild(doc);
+                set_form.appendChild(element);
+                set_form.action = "/update";
+                set_form.submit();
+            }
+            
+            function iterateObject(data, id, name, type, parent) {
+                let keys = Object.keys(data);
+                var found = false;
+                for (var i = 0; i < keys.length; i++) {
+                    if (keys[i] == parent) {
+                        let object = {};
+                        object["name"] = name;
+                        object["type"] = type;
+                        object["parent"] = parent;
+                        if (type == "form") {
+                            object["fields"] = {};
+                        }
+                        data[keys[i]]["fields"][id] = object;
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    for (var i = 0; i < keys.length; i++) {
+                        if (data[keys[i]].hasOwnProperty("fields")) {
+                            iterateObject(data[keys[i]]["fields"], id, name, type, parent);
+                        }
+                    }
+                }
+            }
+
             var p1 = 0;
             var p2 = 0;
             function update_all() {
@@ -258,38 +555,28 @@
             function number_decrement(id) {
                 document.getElementById(id).stepDown();
             }
-            function show_player(id) {
-                if (id == "player1") {
-                    if (p1 < 4) {
-                        p1 = p1 + 1;
-                        document.getElementById(id + "[" + p1 + "].name").style.display = 'block';
-                        document.getElementById(id + "[" + p1 + "].name").parentNode.style.display = 'flex';
-                    }
-                }
-                else {
-                    if (p2 < 4) {
-                        p2 = p2 + 1;
-                        document.getElementById(id + "[" + p2 + "].name").style.display = 'block';
-                        document.getElementById(id + "[" + p2 + "].name").parentNode.style.display = 'flex';
-                    }
+            function add_new_player(id) {
+                let parent = document.getElementById(id);
+                let element = document.createElement("div");
+                let element_input = document.createElement("input");
+                element_input.setAttribute("type",  "text");
+                element_input.setAttribute("id",    id + "[" + (parent.children.length - 1) + "].name");
+                element_input.setAttribute("name",  id + "[" + (parent.children.length - 1) + "].name");
+                element_input.setAttribute("class", "text");
+                element_input.setAttribute("placeholder", "Player Name");
+                element.appendChild(element_input);
+                parent.appendChild(element);
+            }
+            function remove_new_player(id) {
+                let parent = document.getElementById(id);
+                if (parent.children.length > 2) {
+                    parent.removeChild(parent.lastChild);
                 }
             }
-            function hide_player(id) {
-                if (id == "player1") {
-                    if (p1 > 0) {
-                        document.getElementById(id + "[" + p1 + "].name").style.display = 'none';
-                        document.getElementById(id + "[" + p1 + "].name").parentNode.style.display = 'none';
-                        document.getElementById(id + "[" + p1 + "].name").value = "";
-                        p1 = p1 - 1;
-                    }
-                }
-                else {
-                    if (p2 > 0) {
-                        document.getElementById(id + "[" + p2 + "].name").style.display = 'none';
-                        document.getElementById(id + "[" + p2 + "].name").parentNode.style.display = 'none';
-                        document.getElementById(id + "[" + p2 + "].name").value = "";
-                        p2 = p2 - 1;
-                    }
+            function remove_new_player(id) {
+                let parent = document.getElementById(id);
+                if (parent.children.length > 2) {
+                    parent.removeChild(parent.lastChild);
                 }
             }
             function set_bracket(id, value) {
@@ -343,163 +630,31 @@
             </div>
         </div>
         <iframe name = "dummy" id = "dummy" style = "display: none;"></iframe>
-        <form   id = "form_tournament_id"   action = "/get/tournament"      method="post" enctype = "multipart/form-data" target = "dummy">
-            <div class = "form_section">
-                <fieldset>
-                    <legend>Tournament ID</legend>
-                    <div>
-                        <input type = "text"    class = "text"  id = "tournament_id"    name = "tournament_id"      placeholder = "Tournament ID"><br>
-                    </div>
-                    <input type = "submit"  class = "button"    value = "Update">
-                </fieldset>
-            </div>
-        </form>
-        <form   id = "form_tournament_info" action = "/update/tournament"   method="post" enctype = "multipart/form-data" target = "dummy">
-            <div class = "form_section">
-                <fieldset>
-                    <legend>Tournament Information</legend>
-                    <div>
-                        <input type = "text"    class = "text"  id = "tournament_name"  name = "tournament_name"    placeholder = "Tournament Name"><br>
-                        <input type = "text"    class = "text"  id = "tournament_date"  name = "tournament_date"    placeholder = "Tournament Date"><br>
-                        <input type = "text"    class = "text"  id = "event_name"       name = "event_name"         placeholder = "Event Name"><br>
-                    </div>
-                    <input type = "submit"  class = "button"    value = "Update">
-                </fieldset>
-            </div>
-        </form>
-        <form   id = "form_set_info"        action = "/update/set"          method="post" enctype = "multipart/form-data" target = "dummy">
-            <div class = "form_section">
-                <fieldset   class = "section">
-                    <legend>Set Information</legend>
-                    <div>
-                        <input type = "text"    class = "text"  id = "set_name"     name = "set_name"           placeholder = "Set Name"    autocomplete = "on" list = "set_name_list"><br>
-                        <datalist               id = "set_name_list">
-                            <option             value = "Friendlies"></option>
-                            <option             value = "Round "></option>
-                            <option             value = "Losers Round "></option>
-                            <option             value = "Losers Quarters"></option>
-                            <option             value = "Losers Semis"></option>
-                            <option             value = "Losers Finals"></option>
-                            <option             value = "Winners Round "></option>
-                            <option             value = "Winners Quarters"></option>
-                            <option             value = "Winners Semis"></option>
-                            <option             value = "Winners Finals"></option>
-                            <option             value = "Grand Finals"></option>
-                            <option             value = "Grand Finals Reset"></option>
-                        </datalist>
-                        <input type = "text"    class = "text"  id = "set_goal"     name = "set_goal"           placeholder = "Set Goal"    autocomplete = "on" list = "set_goal_list"><br>
-                        <datalist               id = "set_goal_list">
-                            <option             value = "First to 2"></option>
-                            <option             value = "First to 3"></option>
-                            <option             value = "First to 5"></option>
-                            <option             value = "First to 10"></option>
-                        </datalist>
-                    </div>
-                    <div>
-                        <fieldset   class = "subsection">
-                            <legend>Player 1 Side</legend>
-                            <div class = "hidden">
-                                <input type = "text"    id = "player1.name"     class = "text hidden"   name = "player1.name"       placeholder = "Team Name">
-                            </div>
-                            <div>
-                                <input type = "text"    id = "player1[0].name"  class = "text"          name = "player1[0].name"    placeholder = "Player Name">
-                            </div>
-                            <div class = "hidden">
-                                <input type = "text"    id = "player1[1].name"  class = "text hidden"   name = "player1[1].name"    placeholder = "Additional Player Name">
-                            </div>
-                            <div class = "hidden">
-                                <input type = "text"    id = "player1[2].name"  class = "text hidden"   name = "player1[2].name"    placeholder = "Additional Player Name">
-                            </div>
-                            <div class = "hidden">
-                                <input type = "text"    id = "player1[3].name"  class = "text hidden"   name = "player1[3].name"    placeholder = "Additional Player Name">
-                            </div>
-                            <div class = "hidden">
-                                <input type = "text"    id = "player1[4].name"  class = "text hidden"   name = "player1[4].name"    placeholder = "Additional Player Name">
-                            </div>
-                            <div>
-                                <input type = "button"  id = "remove_player"    class = "button left_button"    onclick = "hide_player('player1')"  value = "-"/>
-                                <input type = "button"  id = "add_player"       class = "button right_button"   onclick = "show_player('player1')"  value = "+"/>
-                                <input type = "button"  id = "player1.bracket.winners"  class = "button"        onclick = "set_bracket('player1', ' [W]')"      value = "Winners">
-                                <input type = "button"  id = "player1.bracket.losers"   class = "button"        onclick = "set_bracket('player1', ' [L]')"      value = "Losers">
-                                <input type = "text"    id = "player1.bracket"  class = "text hidden"           name = "player1.bracket"            value = "">
-                                <input type = "button"  id = "decrement"        class = "button left_button"    onclick = "number_decrement('player1.score')"   value = "-"/>
-                                <input type = "number"  id = "player1.score"    name = "player1.score"  value = "0">
-                                <input type = "button"  id = "increment"        class = "button right_button"   onclick = "number_increment('player1.score')"   value = "+"/>
-                            </div>
-                        </fieldset>
-                        <div    class = "center_section">
-                            <div>
-                                <input type = "button"      id = "swap_players" class = "button"    onclick = "swap_players()"  value = "Swap Players"/>
-                            </div>
-                            <div>
-                                <input type = "button"      id = "swap_cameras" class = "button"    onclick = "swap_cameras()"  value = "Swap Cameras"/>
-                            </div>
-                            <div>
-                                <input type = "button"      id = "team_toggle"  class = "button"    onclick = "toggle_teams()"  value = "Team Names"/>
-                            </div>
-                        </div>
-                        <fieldset   class = "subsection">
-                            <legend>Player 2 Side</legend>
-                            <div class = "hidden">
-                                <input type = "text"    id = "player2.name"     class = "text hidden"   name = "player2.name"       placeholder = "Team Name">
-                            </div>
-                            <div>
-                                <input type = "text"    id = "player2[0].name"  class = "text"          name = "player2[0].name"    placeholder = "Player Name">
-                            </div>
-                            <div class = "hidden">
-                                <input type = "text"    id = "player2[1].name"  class = "text hidden"   name = "player2[1].name"    placeholder = "Additional Player Name">
-                            </div>
-                            <div class = "hidden">
-                                <input type = "text"    id = "player2[2].name"  class = "text hidden"   name = "player2[2].name"    placeholder = "Additional Player Name">
-                            </div>
-                            <div class = "hidden">
-                                <input type = "text"    id = "player2[3].name"  class = "text hidden"   name = "player2[3].name"    placeholder = "Additional Player Name">
-                            </div>
-                            <div class = "hidden">
-                                <input type = "text"    id = "player2[4].name"  class = "text hidden"   name = "player2[4].name"    placeholder = "Additional Player Name">
-                            </div>
-                            <div>
-                                <input type = "button"  id = "decrement"        class = "button left_button"    onclick = "number_decrement('player2.score')"   value = "-"/>
-                                <input type = "number"  id = "player2.score"    name = "player2.score"  value = "0">
-                                <input type = "button"  id = "increment"        class = "button right_button"   onclick = "number_increment('player2.score')"   value = "+"/>
-                                <input type = "button"  id = "player2.bracket.winners"  class = "button"        onclick = "set_bracket('player2', '[W] ')"      value = "Winners">
-                                <input type = "button"  id = "player2.bracket.losers"   class = "button"        onclick = "set_bracket('player2', '[L] ')"      value = "Losers">
-                                <input type = "text"    id = "player2.bracket"  class = "text hidden"           name = "player2.bracket"            value = "">
-                                <input type = "button"  id = "remove_player"    class = "button left_button"    onclick = "hide_player('player2')"  value = "-"/>
-                                <input type = "button"  id = "add_player"       class = "button right_button"   onclick = "show_player('player2')"  value = "+"/>
-                            </div>
-                        </fieldset>
-                    </div>
-                    <input type = "submit"  class = "button"    value = "Update">
-                </fieldset>
-            </div>
-        </form>
-        <div class = "form">
-            <div class = "form_section">
+        <div                class = "form">
+            <div            class = "form_section">
                 <fieldset   class = "section">
                     <legend>Options</legend>
                     <div>
-                        <input type = "button"  class = "button"    onclick = "update_all()" value = "Update All"/>
+                        <input type = "text"    class = "text"      id = "tool_form_target"     placeholder = "Form Section Name">
+                        <input type = "text"    class = "text"      id = "tool_form_parent"     placeholder = "Form Parent Name (Optional)">
+                        <input type = "button"  class = "button"    onclick = "add_new_form()"  value = "Add New Form Section"/>
+                    </div>
+                    <div>
+                        <input type = "text"    class = "text"      id = "tool_field_target"    placeholder = "Field Section Name">
+                        <input type = "text"    class = "text"      id = "tool_field_parent"    placeholder = "Field Parent Name">
+                        <input type = "button"  class = "button"    onclick = "add_new_field()" value = "Add New Field"/>
+                    </div>
+                    <div>
+                        <input type = "button"  class = "button"    onclick = "save_fields()"   value = "Save Fields"/>
+                    </div>
+                    <div>
+                        <input type = "button"  class = "button"    onclick = "update_all()"    value = "Update All"/>
                         <input type = "button"  class = "button"    onclick = "location.href='/quit';" value = "Quit"/>
                     </div>
                 </fieldset>
             </div>
         </div>
-        <script>
-            var coll = document.getElementsByClassName("menu_button");
-            var i;
-            for (i = 0; i < coll.length; i++) {
-                coll[i].addEventListener("click", function() {
-                    this.classList.toggle("menu_active");
-                    var content = this.nextElementSibling;
-                    if (content.style.maxHeight){
-                        content.style.maxHeight = null;
-                    }
-                    else {
-                        content.style.maxHeight = content.scrollHeight + "px";
-                    } 
-                });
-            }
-        </script>
+        <form id = "fields"         method = "post" enctype = "multipart/form-data" target = "dummy"></form>
+        <form id = "form_update"    method = "post" enctype = "multipart/form-data" target = "dummy"></form>
     </body>
 </html>
